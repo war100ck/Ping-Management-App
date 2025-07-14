@@ -1,5 +1,42 @@
+import sys
+import subprocess
+import tkinter.messagebox as messagebox
+
+# Функция для проверки и установки отсутствующих модулей
+def install_missing_packages():
+    required_packages = {
+        'ttkbootstrap': 'ttkbootstrap',
+        'psutil': 'psutil',
+        'pythonping': 'pythonping',
+        'requests': 'requests'
+    }
+    
+    missing_packages = []
+    for package, import_name in required_packages.items():
+        try:
+            __import__(import_name)
+        except ImportError:
+            missing_packages.append(package)
+    
+    if missing_packages:
+        message = f"To operate the program, you need to install the following modules: {', '.join(missing_packages)}.\nInstall now?"
+        if messagebox.askyesno("Installing modules", message):
+            for package in missing_packages:
+                try:
+                    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+                except subprocess.CalledProcessError:
+                    messagebox.showerror("Ошибка", f"Failed to install module {package}")
+                    sys.exit(1)
+            messagebox.showinfo("Success", "The modules have been installed successfully. Please restart the program..")
+            sys.exit(0)
+
+# Проверяем модули до всех остальных импортов
+if not hasattr(sys, 'frozen'):
+    install_missing_packages()
+
+# Теперь импортируем все остальные модули
 import tkinter as tk
-from tkinter import filedialog, colorchooser, messagebox
+from tkinter import filedialog, colorchooser
 import ttkbootstrap as ttkb
 from tkinter import ttk
 import psutil
